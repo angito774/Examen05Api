@@ -17,8 +17,9 @@ namespace Examen05Api.Controllers
         }
 
         [HttpPost]
-        public bool Insertar(CategoriaRequest obj)
+        public RespuestaEN<string> Insertar(CategoriaRequest obj)
         {
+            RespuestaEN<string> _RespuestaEN;
             try
             {
                 Categoria categoria = new Categoria();
@@ -27,39 +28,66 @@ namespace Examen05Api.Controllers
 
                 db.Categorias.Add(categoria);
                 db.SaveChanges();
-                return true;
+
+                _RespuestaEN = new RespuestaEN<string>() { status = true, msg = "Se Guardo Correctamente", value = null };
+                return _RespuestaEN;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                _RespuestaEN = new RespuestaEN<string>() { status = false, msg = ex.Message, value = null };
+                return _RespuestaEN;
             }
         }
 
         [HttpGet]
-        public IEnumerable<CategoriaResponse> Listar()
+        public RespuestaEN<IEnumerable<CategoriaResponse>> Listar()
         {
-            var objj = db.Categorias.ToList();
-            var response = objj.Select(x => new CategoriaResponse()
+            RespuestaEN<IEnumerable<CategoriaResponse>> _RespuestaEN;
+            try
             {
-                CategoriaId = x.CategoriaId,
-                Nombre= x.Nombre,
-                Descripcion = x.Descripcion
-            }).ToList();
-            return response;
+                var objj = db.Categorias.ToList();
+                var response = objj.Select(x => new CategoriaResponse()
+                {
+                    CategoriaId = x.CategoriaId,
+                    Nombre = x.Nombre,
+                    Descripcion = x.Descripcion
+                }).ToList();
+                _RespuestaEN = new RespuestaEN<IEnumerable<CategoriaResponse>>() { status = true, msg = "Ok", value = response };
+                return _RespuestaEN;
+            }
+            catch (Exception ex)
+            {
+                _RespuestaEN = new RespuestaEN<IEnumerable<CategoriaResponse>> { status = false, msg = ex.Message, value = null };
+                return _RespuestaEN;
+            }
         }
 
         [HttpGet]
-        public CategoriaResponse ListaPorId(int id)
+        public RespuestaEN<CategoriaResponse> ListaPorId(int id)
         {
-            var objj = db.Categorias.FirstOrDefault(x => x.CategoriaId == id);
-
-            var response = new CategoriaResponse()
+            RespuestaEN<CategoriaResponse> _RespuestaEN;
+            try
             {
-                CategoriaId = objj.CategoriaId,
-                Nombre = objj.Nombre,
-                Descripcion = objj.Descripcion
-            };
-            return response;
+                var objj = db.Categorias.FirstOrDefault(x => x.CategoriaId == id);
+                if (objj == null)
+                {
+                    _RespuestaEN = new RespuestaEN<CategoriaResponse>() { status = false, msg = "Id Categoria No Existe", value = null };
+                    return _RespuestaEN;
+                }
+                var response = new CategoriaResponse()
+                {
+                    CategoriaId = objj.CategoriaId,
+                    Nombre = objj.Nombre,
+                    Descripcion = objj.Descripcion
+                };
+                _RespuestaEN = new RespuestaEN<CategoriaResponse>() { status = true, msg = "Ok", value = response };
+                return _RespuestaEN;
+            }
+            catch (Exception ex)
+            {
+                _RespuestaEN = new RespuestaEN<CategoriaResponse> { status = false, msg = ex.Message, value = null };
+                return _RespuestaEN;
+            }
         }
 
 

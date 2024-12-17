@@ -19,10 +19,17 @@ namespace Examen05Api.Controllers
 
 
         [HttpPost]
-        public bool Insertar(ProductoRequest obj)
+        public RespuestaEN<string> Insertar(ProductoRequest obj)
         {
+            RespuestaEN<string> _RespuestaEN;
             try
             {
+                if (obj.Nombre.Trim().Length == 0 || obj.Precio > 0)
+                {
+                    _RespuestaEN = new RespuestaEN<string>() { status = false, msg = "Por favor ingresar los campos requeridos", value = null };
+                    return _RespuestaEN;
+                }
+
                 Producto _producto = new Producto();
                 _producto.Nombre = obj.Nombre;
                 _producto.Precio = obj.Precio;
@@ -30,46 +37,75 @@ namespace Examen05Api.Controllers
 
                 db.Productos.Add(_producto);
                 db.SaveChanges();
-                return true;
+
+                _RespuestaEN = new RespuestaEN<string>() { status = true, msg = "Se Guardo Correctamente", value = null };
+                return _RespuestaEN;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                _RespuestaEN = new RespuestaEN<string>() { status = false, msg = ex.Message, value = null };
+                return _RespuestaEN;
             }
         }
 
         [HttpGet]
-        public IEnumerable<ProductoResponse> Listar()
+        public RespuestaEN<IEnumerable<ProductoResponse>> Listar()
         {
-            var response = (from P in db.Productos
-                            join C in db.Categorias on
-                            P.CategoriaId equals C.CategoriaId
-                            select new ProductoResponse
-                            {
-                                ProductoId = P.ProductoId,
-                                Nombre = P.Nombre,
-                                Precio = P.Precio,
-                                NombreCategoria = P.Categoria.Nombre
-                            }).ToList();
-            return response;
+            RespuestaEN<IEnumerable<ProductoResponse>> _RespuestaEN;
+            try
+            {
+                var response = (from P in db.Productos
+                                join C in db.Categorias on
+                                P.CategoriaId equals C.CategoriaId
+                                select new ProductoResponse
+                                {
+                                    ProductoId = P.ProductoId,
+                                    Nombre = P.Nombre,
+                                    Precio = P.Precio,
+                                    NombreCategoria = P.Categoria.Nombre
+                                }).ToList();
+                _RespuestaEN = new RespuestaEN<IEnumerable<ProductoResponse>>() { status = true, msg = "Ok", value = response };
+                return _RespuestaEN;
+            }
+            catch (Exception ex)
+            {
+                _RespuestaEN = new RespuestaEN<IEnumerable<ProductoResponse>> { status = false, msg = ex.Message, value = null };
+                return _RespuestaEN;
+            }            
         }
 
         [HttpGet]
-        public ProductoResponse ListaPorId(int id)
+        public RespuestaEN<ProductoResponse> ListaPorId(int id)
         {
-            var response = (from P in db.Productos
-                            join C in db.Categorias on
-                            P.CategoriaId equals C.CategoriaId
-                            where P.ProductoId == id
-                            select new ProductoResponse
-                            {
-                                ProductoId = P.ProductoId,
-                                Nombre = P.Nombre,
-                                Precio = P.Precio,
-                                NombreCategoria = P.Categoria.Nombre
-                            }).FirstOrDefault();
-            return response;
+            RespuestaEN<ProductoResponse> _RespuestaEN;
+            try
+            {
+                var response = (from P in db.Productos
+                                join C in db.Categorias on
+                                P.CategoriaId equals C.CategoriaId
+                                where P.ProductoId == id
+                                select new ProductoResponse
+                                {
+                                    ProductoId = P.ProductoId,
+                                    Nombre = P.Nombre,
+                                    Precio = P.Precio,
+                                    NombreCategoria = P.Categoria.Nombre
+                                }).FirstOrDefault();
 
+                if (response == null)
+                {
+                    _RespuestaEN = new RespuestaEN<ProductoResponse>() { status = false, msg = "Id Producto No Existe", value = null };
+                    return _RespuestaEN;
+                }
+
+                _RespuestaEN = new RespuestaEN<ProductoResponse>() { status = true, msg = "Ok", value = response };
+                return _RespuestaEN;
+            }
+            catch (Exception ex)
+            {
+                _RespuestaEN = new RespuestaEN<ProductoResponse> { status = false, msg = ex.Message, value = null };
+                return _RespuestaEN;
+            }
         }
 
 
