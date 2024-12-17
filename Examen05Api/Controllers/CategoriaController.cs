@@ -22,6 +22,12 @@ namespace Examen05Api.Controllers
             RespuestaEN<string> _RespuestaEN;
             try
             {
+                if (obj.Nombre.Trim().Length == 0)
+                {
+                    _RespuestaEN = new RespuestaEN<string>() { status = false, msg = "Por favor ingresar los campos requeridos", value = null };
+                    return _RespuestaEN;
+                }
+
                 Categoria categoria = new Categoria();
                 categoria.Nombre = obj.Nombre;
                 categoria.Descripcion = obj.Descripcion;
